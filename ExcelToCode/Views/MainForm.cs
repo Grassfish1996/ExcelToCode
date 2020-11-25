@@ -323,6 +323,11 @@ namespace ExcelToCode.Views
 
             return code;
         }
-        
+
+        private void button9_Click_1(object sender, EventArgs e)
+        {
+            StrReplaceForm form = new StrReplaceForm();
+            form.ShowDialog();
+        }
     }
 }
