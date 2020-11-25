@@ -64,16 +64,19 @@ namespace ExcelToCode.Logical
             int rowcount = maxRowNum + 1;
             int maxColNum = getMaxColNum(sheet);
             this.maxColNum = maxColNum;
-            int colcount = maxColNum + 1;
             //List<String> list = new List<String>();
             //按列取数据
-            for (int i = 0; i < colcount; i++)
+            for (int i = 0; i < maxColNum; i++)
             {
                 List<String> list = new List<String>();
                 for(int j=0;j<rowcount;j++)
                 {
+                    String value = "";
                     IRow row = sheet.GetRow(j);
-                    String value = getCellString(row, i);
+                    if (row != null)
+                    {
+                        value = getCellString(row, i);
+                    }
                     //去空格换行
                     value.Replace('\n', ' ').Replace(" ", "").Replace("（", "(").Replace("）", ")");
                     list.Add(value);
@@ -85,12 +88,15 @@ namespace ExcelToCode.Logical
             {
                 List<String> list = new List<String>();
                 IRow row = sheet.GetRow(i);
-                for (int j = 0; j < row.LastCellNum;j++ )
+                if (row != null)
                 {
-                    String value = getCellString(row, j);
-                    //去空格换行
-                    value.Replace('\n', ' ').Replace(" ", "").Replace("（", "(").Replace("）", ")");
-                    list.Add(value);
+                    for (int j = 0; j < row.LastCellNum; j++)
+                    {
+                        String value = getCellString(row, j);
+                        //去空格换行
+                        value.Replace('\n', ' ').Replace(" ", "").Replace("（", "(").Replace("）", ")");
+                        list.Add(value);
+                    }
                 }
                 objDictionary.Add("row" + i, list);
             }
@@ -101,9 +107,13 @@ namespace ExcelToCode.Logical
         private int getMaxColNum(ISheet sheet)
         {
             List<int> lastCellNumList = new List<int>();
-            for (int i = 0; i < sheet.LastRowNum;i++ )
+            for (int i = 0; i < sheet.LastRowNum + 1;i++ )
             {
                 IRow row = sheet.GetRow(i);
+                if (row == null)
+                {
+                    continue;
+                }
                 lastCellNumList.Add(row.LastCellNum);
             }
             return lastCellNumList.Max();
@@ -161,6 +171,11 @@ namespace ExcelToCode.Logical
             //}
 
             workbook = WorkbookFactory.Create(absolutePath);
+            
+            if(workbook == null)
+            {
+                throw new Exception("读取文件失败");
+            }
 	    }
 
         public static String getCellString(IRow row, int index)
