@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ExcelToCode.Logical;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -72,36 +73,55 @@ namespace ExcelToCode.Views
             String replaceJson = tbx_format.Text;
             JavaScriptSerializer serializer = new JavaScriptSerializer();
             Dictionary<string, object> jsonData = (Dictionary<string, object>)serializer.DeserializeObject(replaceJson);
-            Boolean result = backupOldFile(srcFileFullName);
-            if (!result)
+            Boolean backupResult = backupOldFile(srcFileFullName);
+            if (!backupResult)
             {
                 MessageBox.Show("备份文件失败，无法替换字符串");
             }
 
-            
-            //防止文本字符中有特殊字符。必须用Encoding.Default
-            StreamReader reader = new StreamReader(srcFileFullName, Encoding.Default);
-
-            String a = reader.ReadToEnd();
-            foreach (var item in jsonData)
+            Boolean replaceResult = strReplaceByDictionary(srcFileFullName, jsonData);
+            if (replaceResult)
             {
-                String key = item.Key;
-                String value = item.Value.ToString();
-                //将a.hhp文件中bb替换为cc。
-                a = a.Replace(key, value);
+                MessageBox.Show("替换完成");
             }
             
-            //a.hhp重命名为b.hhp
-            //防止文本字符中有特殊字符。必须用Encoding.Default
-            StreamWriter readTxt = new StreamWriter(@"b.hhp", false, Encoding.Default);
-            readTxt.Write(a);
-            readTxt.Flush();
-            readTxt.Close();
-            reader.Close();
-            //b.hhp重命名为a.hhp,并删除b.hhp
-            File.Copy(@"b.hhp", srcFileFullName, true);
-            File.Delete(@"b.hhp");
-            
+        }
+
+        private Boolean strReplaceByDictionary(string fileFullName,Dictionary<String,Object> dictionary)
+        {
+            Boolean flag = false;
+            try
+            {
+                StreamReader reader = new StreamReader(fileFullName, true);
+                
+                String a = reader.ReadToEnd();
+                foreach (var item in dictionary)
+                {
+                    String key = item.Key;
+                    String value = item.Value.ToString();
+                    
+                    a = a.Replace(key, value);
+                }
+
+                String tempFileName = "strReplaceTempFile_123.txt";
+                File.Copy(srcFileFullName, tempFileName, true);
+                StreamWriter readTxt = new StreamWriter(tempFileName, false);
+                readTxt.Write(a);
+                readTxt.Flush();
+                readTxt.Close();
+                reader.Close();
+                //tempFile重命名为srcFile,并删除tempFile
+                File.Copy(tempFileName, srcFileFullName, true);
+                File.Delete(tempFileName);
+                flag = true;
+            }
+            catch(Exception e)
+            {
+                flag = false;
+                MessageBox.Show("替换失败  " + e.Message);
+            }
+
+            return flag;
         }
 
         //保存源文件相关信息
@@ -109,6 +129,7 @@ namespace ExcelToCode.Views
             srcFilePath = Path.GetDirectoryName(srcFileFullName);
         }
 
+        //备份源文件
         private Boolean backupOldFile(String fileFullName)
         {
             Boolean flag = false;
