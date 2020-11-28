@@ -71,7 +71,6 @@
   <ItemGroup>
     <Compile Include="Enities\Position.cs" />
     <Compile Include="Logical\FileHelper.cs" />
-    <Compile Include="Logical\TextFileEncodingDetector.cs" />
     <Compile Include="Views\StrReplaceForm.cs">
       <SubType>Form</SubType>
     </Compile>

@@ -84,10 +84,11 @@ namespace ExcelToCode.Views
         private void button1_Click(object sender, EventArgs e)
         {
             OpenFileDialog ofd = new OpenFileDialog();
-            ofd.Filter = "Excel文件(*.xls;*.xlsx)|*.xls;*.xlsx|所有文件|*.*";
+            ofd.Filter = "Excel文件(*.xls;*.xlsx;*.xlsm;)|*.xls;*.xlsx;*.xlsm;|所有文件|*.*;";
             ofd.ValidateNames = true;
             ofd.CheckPathExists = true;
             ofd.CheckFileExists = true;
+            // ofd.InitialDirectory = "C:\\";
             if (ofd.ShowDialog() == DialogResult.OK)
             {
                 string strFileName = ofd.FileName;
